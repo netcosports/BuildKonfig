@@ -7,6 +7,12 @@ buildscript {
         maven { url = uri("https://dl.bintray.com/kotlin/kotlinx") }
         maven { url = uri("https://dl.bintray.com/kotlin/kotlin-eap") }
         maven { url = uri("https://dl.bintray.com/jetbrains/kotlin-native-dependencies") }
+        maven(url = "https://artifactory-blr.netcodev.com/artifactory/libs-release") {
+            credentials {
+                username = repoUsername
+                password = repoPassword
+            }
+        }
     }
 
     dependencies {
@@ -20,6 +26,7 @@ buildscript {
 
 plugins {
     id("com.github.ben-manes.versions") version com.codingfeline.buildkonfig.buildsrc.Versions.benManesVersionsPlugin
+    id("com.jfrog.artifactory") version com.codingfeline.buildkonfig.buildsrc.Versions.jfrogArtifactoryVersion
 }
 
 
@@ -33,6 +40,12 @@ allprojects {
         jcenter()
         maven { url = uri("https://dl.bintray.com/kotlin/kotlinx") }
         maven { url = uri("https://dl.bintray.com/kotlin/kotlin-eap") }
+        maven(url = "https://artifactory-blr.netcodev.com/artifactory/libs-release") {
+            credentials {
+                username = repoUsername
+                password = repoPassword
+            }
+        }
     }
 
     group = GROUP

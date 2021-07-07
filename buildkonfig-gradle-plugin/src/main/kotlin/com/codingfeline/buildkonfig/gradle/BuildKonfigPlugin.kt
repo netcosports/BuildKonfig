@@ -38,6 +38,7 @@ open class BuildKonfigPlugin : Plugin<Project> {
         }
     }
 
+
     private fun configure(project: Project, extension: BuildKonfigExtension) {
         val outputDirectory = File(project.buildDir, "buildkonfig")
         val commonOutputDirectory = File(outputDirectory, "commonMain").also { it.mkdirs() }
@@ -51,15 +52,32 @@ open class BuildKonfigPlugin : Plugin<Project> {
         sourceSets.getByName("commonMain").kotlin
             .srcDirs(commonOutputDirectory.toRelativeString(project.projectDir))
 
+        val createdSourceSet = mutableSetOf<String>()
         targets.filter { it.name != "metadata" }.forEach { target ->
             val name = "${target.name}Main"
             val sourceSetMain = sourceSets.getByName(name)
 
-            val outDirMain = File(outputDirectory, name).also { it.mkdirs() }
+            val dependentSourceSet = sourceSetMain.dependsOn.filter { it.name != "commonMain" }
+            val buildSourceSet = if (dependentSourceSet.isNotEmpty()) {
+                dependentSourceSet
+            } else {
+                setOf(sourceSetMain)
+            }
 
-            sourceSetMain.kotlin.srcDirs(outDirMain.toRelativeString(project.projectDir))
 
-            outputDirectoryMap[TargetName(target.name, target.platformType.toKgqlPlatformType())] = outDirMain
+            buildSourceSet.forEach { sourceSet ->
+                val name = sourceSet.name
+
+                if (!createdSourceSet.contains(name)) {
+                    val outDirMain = File(outputDirectory, name).also { it.mkdirs() }
+
+                    sourceSet.kotlin.srcDirs(outDirMain.toRelativeString(project.projectDir))
+
+                    outputDirectoryMap[TargetName(name.replace("Main", ""), target.platformType.toKgqlPlatformType())] =
+                        outDirMain
+                    createdSourceSet.add(name)
+                }
+            }
         }
 
         project.afterEvaluate { p ->

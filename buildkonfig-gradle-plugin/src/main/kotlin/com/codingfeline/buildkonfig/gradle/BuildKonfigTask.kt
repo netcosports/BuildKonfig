@@ -110,7 +110,7 @@ open class BuildKonfigTask : DefaultTask() {
             specs.forEach { (name, value) ->
                 val alreadyPresent = result.fieldSpecs[name]
                 if (alreadyPresent != null) {
-                    logger.info("Default BuildKonfig: buildConfigField '$name' is being replaced with flavored($flavor): ${alreadyPresent.value} -> ${value.value}")
+                    logger.info("Default BuildKonfig: buildConfigField '$name' is being replaced with flavored($flavor): ${alreadyPresent} -> ${value}")
                 }
                 result.fieldSpecs[name] = value.copy()
             }
@@ -134,7 +134,7 @@ open class BuildKonfigTask : DefaultTask() {
         newConfig.fieldSpecs.forEach { (name, value) ->
             val alreadyPresent = result.fieldSpecs[name]
             if (alreadyPresent != null) {
-                logger.info("BuildKonfig for $targetName: buildConfigField '$name' is being replaced: ${alreadyPresent.value} -> ${value.value}")
+                logger.info("BuildKonfig for $targetName: buildConfigField '$name' is being replaced: ${alreadyPresent} -> ${value}")
             }
             result.fieldSpecs[name] = value.copy(isTargetSpecific = !defaultConfig.fieldSpecs.contains(name))
         }

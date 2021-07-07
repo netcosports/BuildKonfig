@@ -7,6 +7,7 @@ object Versions {
     const val jvmTarget = "1.8"
     const val benManesVersionsPlugin = "0.39.0"
     const val gradle = "6.9"
+    const val jfrogArtifactoryVersion = "4.20.0"
 }
 
 object Dependencies {
