@@ -22,14 +22,8 @@ data class FieldSpec(
                 is FieldValue.LongValue -> add("%L", value.value)
                 is FieldValue.BooleanValue -> add("%L", value.value)
                 is FieldValue.StringListValue -> {
-                    var list = "listOf<String>("
-                    value.value.forEach {
-                        list += "\"$it\""
-                    }
-                    list += ")"
-                    add(
-                        "%L", list
-                    )
+                    val list = value.value.joinToString(prefix = "listOf<String>(", postfix = ")")
+                    add("%L", list)
                 }
             }
         }
