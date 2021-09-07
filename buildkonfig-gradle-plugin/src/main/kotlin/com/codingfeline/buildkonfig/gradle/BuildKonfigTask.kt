@@ -6,6 +6,7 @@ import com.codingfeline.buildkonfig.compiler.BuildKonfigEnvironment
 import com.codingfeline.buildkonfig.compiler.TargetConfig
 import com.codingfeline.buildkonfig.compiler.TargetConfigFile
 import com.codingfeline.buildkonfig.compiler.TargetName
+import com.codingfeline.buildkonfig.gradle.extension.BuildKonfigExtensionConfig
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
@@ -16,8 +17,9 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import java.io.File
 
 const val FLAVOR_PROPERTY = "buildkonfig.flavor"
+const val APP_PROPERTY = "buildkonfig.app"
 
-open class BuildKonfigTask : DefaultTask() {
+open class BuildKonfigTask() : DefaultTask() {
 
     // Required to invalidate the task on version updates.
     @Suppress("unused")
@@ -39,19 +41,31 @@ open class BuildKonfigTask : DefaultTask() {
         get() = outputDirectories.keys
 
     @Internal
-    lateinit var extension: BuildKonfigExtension
+    lateinit var extension: BuildKonfigExtensionConfig
 
     @get:Input
-    val defaultConfigs: Map<String, TargetConfig>
-        get() = extension.defaultConfigs.mapValues { (_, value) -> value.toTargetConfig() }
+    val appConfig
+        get() = extension.appConfigList.first { it.name == appName }
 
     @get:Input
-    val targetConfigs: Map<String, List<TargetConfig>>
-        get() = extension.targetConfigs.mapValues { (_, value) -> value.map { it.toTargetConfig() } }
+    val defaultConfigs: Map<String, BuildKonfigExtensionConfig.DefaultDslConfig>
+        get() = appConfig.defaultConfigs
+
+    @get:Input
+    val targetConfigs: Map<String, BuildKonfigExtensionConfig.TargetDslConfig>
+        get() = appConfig.targetConfigs
+
+    @get:Input
+    val appConfigs: List<BuildKonfigExtensionConfig.AppDslConfig>
+        get() = extension.appConfigList
 
     @get:Input
     val flavor: String
-        get() = findFlavor()
+        get() = findStringProperty(FLAVOR_PROPERTY)
+
+    @get:Input
+    val appName: String
+        get() = findStringProperty(APP_PROPERTY)
 
     @Suppress("unused")
     @get:OutputDirectories
@@ -68,8 +82,12 @@ open class BuildKonfigTask : DefaultTask() {
     @TaskAction
     fun generateBuildKonfigFiles() {
         val flavorName = flavor
+        val appName = appName
 
-        if (!defaultConfigs.containsKey("")) {
+        val appConfig = appConfigs.find { it.name == appName }
+        val defaultConfigs = appConfig?.defaultConfigs
+
+        if (defaultConfigs?.containsKey("") != true) {
             throw IllegalStateException("non flavored defaultConfigs must be provided")
         }
 
@@ -98,10 +116,10 @@ open class BuildKonfigTask : DefaultTask() {
 
     private fun mergeDefaultConfigs(
         flavor: String,
-        baseConfig: TargetConfig,
-        newConfig: TargetConfig?
+        baseConfig: BuildKonfigExtensionConfig.DefaultDslConfig,
+        newConfig: BuildKonfigExtensionConfig.DefaultDslConfig?
     ): TargetConfig {
-        val result = TargetConfig(baseConfig.name)
+        val result = TargetConfig(flavor)
 
         listOf(
             baseConfig.fieldSpecs,
@@ -142,12 +160,12 @@ open class BuildKonfigTask : DefaultTask() {
         return result
     }
 
-    private fun findFlavor(): String {
-        val flavor = project.findProperty(FLAVOR_PROPERTY) ?: ""
-        return if (flavor is String) {
-            flavor
+    private fun findStringProperty(name: String): String {
+        val property = project.findProperty(name) ?: ""
+        return if (property is String) {
+            property
         } else {
-            logger.error("$FLAVOR_PROPERTY must be string. Fallback to non-flavored config: ${flavor::class.java}")
+            logger.error("$name must be string.")
             ""
         }
     }
@@ -163,6 +181,13 @@ open class BuildKonfigTask : DefaultTask() {
         flavorName: String,
         defaultConfig: TargetConfig
     ): List<TargetConfigFile> {
+        val targetConfigs = targetConfigs.mapValues { (flavorKey, flavorTargets) ->
+            flavorTargets.flavorConfigs.map { (targetKey, targetValues) ->
+                TargetConfig(targetKey).apply {
+                    this.fieldSpecs.putAll(targetValues.fieldSpecs)
+                }
+            }
+        }
         return targetNames.map { targetName ->
             if (targetConfigs.isEmpty()) {
                 return@map TargetConfigFile(targetName, outputDirectories.getValue(targetName), null)

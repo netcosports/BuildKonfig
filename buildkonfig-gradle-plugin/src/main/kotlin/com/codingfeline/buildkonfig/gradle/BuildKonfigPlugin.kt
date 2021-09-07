@@ -3,6 +3,7 @@ package com.codingfeline.buildkonfig.gradle
 
 import com.codingfeline.buildkonfig.compiler.PlatformType
 import com.codingfeline.buildkonfig.compiler.TargetName
+import com.codingfeline.buildkonfig.gradle.extension.BuildKonfigExtensionConfig
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
@@ -24,7 +25,7 @@ open class BuildKonfigPlugin : Plugin<Project> {
             }
         }
 
-        val extension = target.extensions.create("buildkonfig", BuildKonfigExtension::class.java, target)
+        val extension = target.extensions.create("buildkonfig", BuildKonfigExtensionConfig::class.java)
 
         target.afterEvaluate {
             if (!isMultiplatform) {
@@ -39,7 +40,7 @@ open class BuildKonfigPlugin : Plugin<Project> {
     }
 
 
-    private fun configure(project: Project, extension: BuildKonfigExtension) {
+    private fun configure(project: Project, extension: BuildKonfigExtensionConfig) {
         val outputDirectory = File(project.buildDir, "buildkonfig")
         val commonOutputDirectory = File(outputDirectory, "commonMain").also { it.mkdirs() }
 

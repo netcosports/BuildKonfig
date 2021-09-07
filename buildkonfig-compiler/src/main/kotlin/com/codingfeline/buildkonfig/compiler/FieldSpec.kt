@@ -22,7 +22,9 @@ data class FieldSpec(
                 is FieldValue.LongValue -> add("%L", value.value)
                 is FieldValue.BooleanValue -> add("%L", value.value)
                 is FieldValue.StringListValue -> {
-                    val list = value.value.joinToString(prefix = "listOf<String>(", postfix = ")")
+                    val list = value.value.joinToString(prefix = "listOf<String>(", postfix = ")", transform = {
+                        "\"$it\""
+                    })
                     add("%L", list)
                 }
             }
@@ -33,30 +35,30 @@ data class FieldSpec(
         abstract val typeName: TypeName
 
         data class StringValue(
-            val value: String
+            val value: String?
         ) : FieldValue() {
             override val typeName: TypeName
-                get() = String::class.asTypeName()
+                get() = String::class.asTypeName().copy(nullable = value == null)
         }
 
-        data class IntValue(val value: IntValue) : FieldValue() {
+        data class IntValue(val value: Int?) : FieldValue() {
             override val typeName: TypeName
-                get() = Int::class.asTypeName()
+                get() = Int::class.asTypeName().copy(nullable = value == null)
         }
 
-        data class FloatValue(val value: FloatValue) : FieldValue() {
+        data class FloatValue(val value: Float?) : FieldValue() {
             override val typeName: TypeName
-                get() = Float::class.asTypeName()
+                get() = Float::class.asTypeName().copy(nullable = value == null)
         }
 
-        data class LongValue(val value: LongValue) : FieldValue() {
+        data class LongValue(val value: Long?) : FieldValue() {
             override val typeName: TypeName
-                get() = Long::class.asTypeName()
+                get() = Long::class.asTypeName().copy(nullable = value == null)
         }
 
-        data class BooleanValue(val value: BooleanValue) : FieldValue() {
+        data class BooleanValue(val value: Boolean?) : FieldValue() {
             override val typeName: TypeName
-                get() = Boolean::class.asTypeName()
+                get() = Boolean::class.asTypeName().copy(nullable = value == null)
         }
 
         data class StringListValue(val value: List<String>) : FieldValue() {

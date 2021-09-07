@@ -1,5 +1,6 @@
 import com.codingfeline.buildkonfig.buildsrc.Dependencies
 import com.codingfeline.buildkonfig.buildsrc.Versions
+import org.gradle.api.internal.artifacts.dependencies.DefaultProjectDependency
 
 plugins {
     id("org.jetbrains.kotlin.jvm")
@@ -10,7 +11,7 @@ plugins {
 }
 
 val libraryGroupId = "com.netcosports"
-val libraryVersion = "1.0.1"
+val libraryVersion = "1.0.3"
 val artifactId = "build-konfig"
 
 group = libraryGroupId
@@ -21,28 +22,12 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-val POM_URL: String by project
-val POM_DESCRIPTION: String by project
-val POM_NAME: String by project
 
 gradlePlugin {
     plugins {
         create("buildKonfig") {
             id = "com.codingfeline.buildkonfig"
             implementationClass = "com.codingfeline.buildkonfig.gradle.BuildKonfigPlugin"
-        }
-    }
-}
-
-pluginBundle {
-    website = POM_URL
-    vcsUrl = "https://github.com/yshrsmz/BuildKonfig.git"
-    description = POM_DESCRIPTION
-    tags = listOf("BuildConfig", "Kotlin", "Kotlin Multiplatform")
-
-    (plugins) {
-        "buildKonfig" {
-            displayName = POM_NAME
         }
     }
 }
@@ -104,24 +89,25 @@ publishing {
             // Tell maven to prepare the generated "*.aar" file for publishing
             artifact("$buildDir/libs/${project.getName()}-${libraryVersion}.jar")
 
-            val result = HashMap<String, Dependency>()
-            configurations.getByName("implementation").allDependencies.forEach {
-                result[it.group + '_' + it.name + '_' + it.version] = it
-            }
+            val result = configurations.getByName("implementation").allDependencies.flatMap { dependency ->
+                if (dependency.name == "buildkonfig-compiler") {
+                    (dependency as? DefaultProjectDependency)?.dependencyProject?.configurations?.getByName(
+                        "implementation"
+                    )?.allDependencies.orEmpty()
+                } else {
+                    listOf(dependency)
+                }
+            }.distinctBy { it.name }
 
             pom.withXml {
                 val dependencies = asNode().appendNode("dependencies")
 
-                result.values
+                result
                     .filter {
                         it.group.isNullOrEmpty().not()
                     }
                     .forEach {
                         println(it.name)
-                        if (it.name == "buildkonfig-compiler") {
-                            println("return")
-                            return@forEach
-                        }
                         val dependencyNode = dependencies.appendNode("dependency")
                         dependencyNode.appendNode("groupId", it.group)
                         dependencyNode.appendNode("artifactId", it.name)
@@ -139,8 +125,8 @@ artifactory {
     publish(delegateClosureOf<org.jfrog.gradle.plugin.artifactory.dsl.PublisherConfig> {
         repository(delegateClosureOf<org.jfrog.gradle.plugin.artifactory.dsl.DoubleDelegateWrapper> {
             setProperty("repoKey", "libs-release-local")
-            setProperty("username", "yarik")
-            setProperty("password", "2gpS@x4SKP!#x${"$"}Q9")
+            setProperty("username", repoUsername)
+            setProperty("password", repoPassword)
         })
         defaults(delegateClosureOf<groovy.lang.GroovyObject> {
             invokeMethod(

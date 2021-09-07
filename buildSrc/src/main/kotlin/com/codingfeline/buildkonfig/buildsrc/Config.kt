@@ -11,7 +11,7 @@ object Versions {
 }
 
 object Dependencies {
-    const val androidPlugin = "com.android.tools.build:gradle:4.2.2"
+    const val androidPlugin = "com.android.tools.build:gradle:7.0.1"
     const val kotlinPlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.kotlin}"
     const val dokkaPlugin = "org.jetbrains.dokka:dokka-gradle-plugin:${Versions.dokka}"
     const val gradleVersionsPlugin = "com.github.ben-manes:gradle-versions-plugin:${Versions.benManesVersionsPlugin}"

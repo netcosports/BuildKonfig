@@ -2,6 +2,7 @@ import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 
 buildscript {
     repositories {
+        mavenLocal()
         mavenCentral()
         google()
         jcenter()
@@ -15,6 +16,7 @@ buildscript {
                 password = repoPassword
             }
         }
+
     }
 
     dependencies {
