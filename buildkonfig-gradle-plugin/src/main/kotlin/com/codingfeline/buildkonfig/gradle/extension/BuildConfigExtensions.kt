@@ -7,13 +7,11 @@ import org.gradle.api.Project
 fun Project.buildkonfig(action: BuildKonfigExtensionConfig.() -> Unit) =
     this.extensions.configure("buildkonfig", action)
 
-fun BuildKonfigExtensionConfig.appConfigs(
+fun BuildKonfigExtensionConfig.appConfig(
     name: String = "",
     config: BuildKonfigExtensionConfig.AppDslConfig.() -> Unit
 ) {
-    val appConfig = appConfigList.find { it.name == name } ?: BuildKonfigExtensionConfig.AppDslConfig().apply {
-        this.name = name
-    }
+    val appConfig = appConfigList.find { it.name == name } ?: BuildKonfigExtensionConfig.AppDslConfig(name)
     appConfig.config()
     appConfigList.add(appConfig)
 }

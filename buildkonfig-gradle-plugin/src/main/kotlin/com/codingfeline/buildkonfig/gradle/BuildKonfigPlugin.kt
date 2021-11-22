@@ -10,6 +10,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinMultiplatformPluginWrapper
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinJvmAndroidCompilation
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinMetadataTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeCompilation
 import java.io.File
 
@@ -54,7 +55,7 @@ open class BuildKonfigPlugin : Plugin<Project> {
             .srcDirs(commonOutputDirectory.toRelativeString(project.projectDir))
 
         val createdSourceSet = mutableSetOf<String>()
-        targets.filter { it.name != "metadata" }.forEach { target ->
+        targets.filter { it !is KotlinMetadataTarget }.forEach { target ->
             val name = "${target.name}Main"
             val sourceSetMain = sourceSets.getByName(name)
 

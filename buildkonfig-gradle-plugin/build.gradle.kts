@@ -11,7 +11,7 @@ plugins {
 }
 
 val libraryGroupId = "com.netcosports"
-val libraryVersion = "1.0.3"
+val libraryVersion = "1.0.5"
 val artifactId = "build-konfig"
 
 group = libraryGroupId

@@ -25,6 +25,7 @@ buildscript {
         classpath(com.codingfeline.buildkonfig.buildsrc.Dependencies.gradleVersionsPlugin)
         classpath(com.codingfeline.buildkonfig.buildsrc.Dependencies.pluginPublishPlugin)
         classpath(com.codingfeline.buildkonfig.buildsrc.Dependencies.mavenPublishPlugin)
+//        classpath("com.netcosports:build-konfig:1.0.4")
     }
 }
 

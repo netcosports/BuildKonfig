@@ -10,11 +10,12 @@ open class BuildKonfigExtensionConfig() {
     var packageName: String? = null
     var objectName: String = DEFAULT_KONFIG_OBJECT_NAME
     var exposeObjectWithName: String? = null
-    internal val appConfigList = mutableListOf(AppDslConfig().apply { name = "" })
+    internal val appConfigList = mutableListOf(AppDslConfig().apply {
+        defaultConfigs[""] = DefaultDslConfig()
+    })
 
     @BuildKonfigDsl
-    class AppDslConfig : Serializable {
-        var name: String = ""
+    class AppDslConfig(val name: String = "") : Serializable {
         internal val defaultConfigs = mutableMapOf<String, DefaultDslConfig>()
         internal val targetConfigs = mutableMapOf<String, TargetDslConfig>()
     }
