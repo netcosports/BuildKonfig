@@ -161,7 +161,7 @@ open class BuildKonfigTask() : DefaultTask() {
     }
 
     private fun findStringProperty(name: String): String {
-        val property = project.findProperty(name) ?: ""
+        val property = System.getenv(name) ?: project.findProperty(name) ?: ""
         return if (property is String) {
             property
         } else {

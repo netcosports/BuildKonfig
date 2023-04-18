@@ -10,8 +10,8 @@ plugins {
     id("com.jfrog.artifactory")
 }
 
-val libraryGroupId = "com.netcosports"
-val libraryVersion = "1.0.5"
+val libraryGroupId = "com.origins-digital"
+val libraryVersion = "1.0.6"
 val artifactId = "build-konfig"
 
 group = libraryGroupId
